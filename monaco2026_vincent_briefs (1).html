@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monaco 2026 — RDVs Vincent THIJSSENS</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    background: #111118;
+    border-bottom: 1px solid #1e1e2e;
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  #topbar .label {
+    font-family: monospace;
+    font-size: 11px;
+    color: #444;
+    margin-right: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid #2a2a3a;
+    color: #666;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { color: #aaa; border-color: #444; }
+  .nav-btn.active { color: #fff !important; border-color: transparent; }
+
+  /* MAIN */
+  #main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* CARD HEADER */
+  .card-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 32px;
+  }
+  .card-créneau {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .card-company {
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+    line-height: 1.1;
+  }
+  .card-sector {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-family: monospace;
+    letter-spacing: 1px;
+    border: 1px solid;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .section-title.danger { color: #ef4444; }
+
+  /* CONTACTS */
+  .contacts { display: flex; gap: 12px; flex-wrap: wrap; }
+  .contact-card {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 200px;
+  }
+  .contact-name { font-weight: bold; font-size: 14px; }
+  .contact-role { color: #888; font-size: 12px; margin-top: 2px; }
+
+  /* TEXT BLOCKS */
+  .text-block {
+    color: #c0c0d0;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+
+  /* PROJECTS */
+  .projects { display: flex; flex-direction: column; gap: 10px; }
+  .project-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .priority-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .priority-high { background: #ef4444; }
+  .priority-medium { background: #f59e0b; }
+  .priority-low { background: #6b7280; }
+  .project-label { font-weight: bold; font-size: 13px; margin-bottom: 2px; }
+  .project-detail { color: #888; font-size: 12px; line-height: 1.5; }
+  .priority-legend { margin-top: 8px; display: flex; gap: 12px; font-size: 11px; color: #444; font-family: monospace; }
+
+  /* ANGLE BLOCK */
+  .angle-block {
+    border-radius: 8px;
+    padding: 14px 16px;
+    border: 1px solid;
+  }
+  .angle-block p { color: #d0d0e0; line-height: 1.7; font-size: 14px; }
+
+  /* OPENING QUESTION */
+  .opening-block {
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-style: italic;
+    font-size: 15px;
+    color: #e8e8f0;
+    line-height: 1.6;
+    border: 1px solid var(--accent);
+  }
+
+  /* WATCHOUT BLOCK */
+  .watchout-block {
+    background: #1a0a0a;
+    border: 1px solid #3a1515;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .watchout-block p { color: #c08080; line-height: 1.7; font-size: 14px; }
+
+  /* BOTTOM NAV */
+  #bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #1e1e2e;
+  }
+  .nav-arrow {
+    background: transparent;
+    border: 1px solid #2a2a3a;
+    color: #888;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .nav-arrow:hover { color: #ccc; border-color: #444; }
+  .nav-arrow:disabled { color: #333; cursor: default; }
+  .nav-arrow.next-btn { color: #fff; }
+  #counter { font-family: monospace; font-size: 11px; color: #444; }
+
+  /* PRINT */
+  @media print {
+    #topbar { display: none; }
+    #bottom-nav { display: none; }
+    .card-section { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="label">Vincent · Monaco 2026</span>
+  <div id="nav-buttons"></div>
+</div>
+
+<div id="main"></div>
+
+<script>
+const TAG_COLORS = {
+  SEO: { bg: "#22d3ee22", border: "#22d3ee55", text: "#22d3ee" },
+  GEO: { bg: "#a855f722", border: "#a855f755", text: "#a855f7" },
+  CRM: { bg: "#f9731622", border: "#f9731655", text: "#f97316" },
+  MEDIA: { bg: "#ec489922", border: "#ec489955", text: "#ec4899" },
+  CONTENT: { bg: "#84cc1622", border: "#84cc1655", text: "#84cc16" },
+  SOCIAL: { bg: "#06b6d422", border: "#06b6d455", text: "#06b6d4" },
+  ANALYTICS: { bg: "#fbbf2422", border: "#fbbf2455", text: "#fbbf24" },
+  CRO: { bg: "#64748b22", border: "#64748b55", text: "#64748b" },
+};
+
+const meetings = [
+  {
+    id: 1,
+    date: "Lundi 10 Mars", time: "10:00 → 10:25",
+    company: "ROSTAING", sector: "Équipements de Protection / E-commerce",
+    contacts: [
+      { name: "Gaëtan BOUTON", role: "Responsable E-commerce" },
+      { name: "Marine ELEK", role: "Directrice Communication & Transition Digitale" },
+    ],
+    context: "Fabricant français de gants de protection (paysagisme, bâtiment, industrie). CA de 24M€ dont seulement 1-2% vient du e-commerce aujourd'hui. Ambition 2026 : devenir un acteur e-commerce significatif en DtoC (particuliers) et DtoB (artisans, pros).",
+    projects: [
+      { label: "Logistique & Expérience client", detail: "Gérer stocks, commandes, livraisons, retours — parcours fluide DtoC + DtoB", p: "high" },
+      { label: "Paiement", detail: "Paiement en 1 clic, paiement fractionné — solutions flexibles et sécurisées", p: "medium" },
+      { label: "CMS", detail: "Sur Magento aujourd'hui, ouverts à une solution plus adaptée", p: "medium" },
+      { label: "Marketplaces (ManoMano…)", detail: "Maximiser visibilité sur les places de marché stratégiques", p: "high" },
+      { label: "Pricing & Veille tarifaire", detail: "Suivre les prix du marché, rester compétitif vs revendeurs", p: "medium" },
+      { label: "Acquisition & Influence BtoB", detail: "Trafic qualifié + notoriété via influence/affiliation. BtoB : artisans, paysagistes, bâtiment", p: "high" },
+      { label: "Contenu & Expérience produit", detail: "Fiches enrichies, visuels, vidéos, contenus 3D ? Challenge : gant = produit à essayer", p: "high" },
+      { label: "CRM / Repeat business (Brevo)", detail: "Accompagnement agence CRM/Marketing relationnel. Brevo actuellement en place", p: "high" },
+      { label: "BI & Analytics", detail: "Centraliser data ventes/clients/commandes — dashboards stratégiques, pilotage perf", p: "medium" },
+      { label: "Paid brand", detail: "Conseils/accompagnement campagnes marque pour sécuriser la notoriété", p: "medium" },
+    ],
+    angle: "Rostaing part de presque zéro en digital. C'est à la fois leur force (aucune mauvaise dette) et leur piège (ils risquent de tout vouloir en même temps). Y&N peut être le partenaire full-stack qui structure la vision avant d'exécuter : CRM sur Brevo qu'on optimise, Media/Paid pour la notoriété marque, Content Factory IA Gen pour les fiches produits à grande échelle, et Analytics pour piloter. Le modèle flat-rate Netflix est exactement fait pour une PME avec une ambition forte mais un budget maîtrisé.",
+    opening: "Vous passez de 1-2% à quelle cible e-commerce d'ici fin 2026, et qu'est-ce qui vous empêche d'y arriver aujourd'hui ?",
+    watchout: "Deux interlocuteurs aux profils différents : Gaëtan est E-commerce (opérationnel), Marine est Communication/Transition digitale (stratégique). Ne pas les adresser de la même façon. Risque : ils veulent tout faire en même temps sans prioriser. Ton rôle = les aider à séquencer.",
+    tags: ["CRM","MEDIA","CONTENT","ANALYTICS"],
+    accent: "#e8a838"
+  },
+  {
+    id: 2,
+    date: "Lundi 10 Mars", time: "11:30 → 11:55",
+    company: "ESIEA", sector: "École d'ingénieurs — Digital",
+    contacts: [
+      { name: "Oléna SKRYPNYK", role: "Directrice Marketing Communication" },
+    ],
+    context: "Grande école d'ingénieurs en contexte ultra-concurrentiel (ISEP, EPITA, EFREI…). Enjeu d'attractivité étudiante fort. Déjà sur HubSpot pour le CRM. Budget marketing précis.",
+    projects: [
+      { label: "CRM HubSpot", detail: "Paramétrage, automatisation marketing, nurturing des prospects étudiants", p: "high" },
+      { label: "SEO / GEO", detail: "Faire ressortir le site institutionnel dans un marché très concurrentiel", p: "high" },
+      { label: "Programmatique", detail: "Diversifier les campagnes d'acquisition avec un budget précis", p: "medium" },
+      { label: "Analytics Dashboard", detail: "Outil de pilotage des campagnes d'acquisition multi-sources", p: "medium" },
+    ],
+    angle: "Ils ont HubSpot mais ne l'exploitent pas à fond. Y&N peut démontrer sa valeur rapidement sur l'optimisation CRM + automation, avant d'ouvrir le sujet GEO (écoles = cas d'usage parfait pour 'être la réponse' quand un lycéen demande à ChatGPT quelle école d'ingénieur choisir). Montrer Hubble en live sur des requêtes type 'école ingénieur Paris alternance'.",
+    opening: "Quand un lycéen cherche une école d'ingénieurs sur ChatGPT ou Perplexity aujourd'hui, est-ce que l'ESIEA apparaît dans les réponses ?",
+    watchout: "Budget probablement limité (école). Aller sur des quick wins concrets, pas des projets de 12 mois. Le sujet CRM est leur point d'entrée — ne pas démarrer par le SEO/GEO.",
+    tags: ["CRM","SEO","GEO","MEDIA"],
+    accent: "#4f9cf9"
+  },
+  {
+    id: 3,
+    date: "Lundi 10 Mars", time: "14:30 → 14:55",
+    company: "SPORT DÉCOUVERTE.COM", sector: "E-commerce Loisirs & Activités de plein air",
+    contacts: [
+      { name: "Christophe JACQUART", role: "CEO" },
+    ],
+    context: "Plateforme e-commerce d'activités outdoor. Le CEO se déplace lui-même à Monaco — signal fort d'ambition de transformation. 3 projets très précis, bien formulés. Décisionnaire direct.",
+    projects: [
+      { label: "GEO / LLM — Priorité #1", detail: "Renforcer fortement la présence dans les résultats des LLMs", p: "high" },
+      { label: "IA Automation — Fiches produits", detail: "Automatiser la rédaction de fiches produits via agents IA", p: "high" },
+      { label: "IA Automation — Service client", detail: "Agents IA pour le service client on-site", p: "high" },
+      { label: "CRO via IA on-site", detail: "Amélioration du taux de conversion grâce à des agents IA", p: "medium" },
+    ],
+    angle: "Ce RDV est dans le cœur de cible de Y&N. Le CEO a une vision claire et des projets concrets. Le Content Factory IA Gen répond directement au projet fiches produits. Hubble répond directement au projet GEO/LLM monitoring. Ouvrir Hubble en live et montrer la visibilité de Sport Découverte vs concurrents sur des requêtes 'kayak location Normandie' ou 'randonnée alpine débutant'. L'impact sera immédiat.",
+    opening: "Sur Hubble, j'ai regardé votre visibilité dans les LLMs avant de venir — vous voulez qu'on regarde ça ensemble maintenant ?",
+    watchout: "CEO = décisionnaire mais aussi visionnaire. Ne pas rentrer dans le détail technique trop vite. Cadrer sur la vision business avant les outils. S'assurer de comprendre leur modèle exact (marketplace, direct, B2C pur ?).",
+    tags: ["GEO","CONTENT","SEO"],
+    accent: "#5cb85c"
+  },
+  {
+    id: 4,
+    date: "Lundi 10 Mars", time: "15:00 → 15:25",
+    company: "EDREAMS ODIGEO", sector: "Travel — OTA / Liligo",
+    contacts: [
+      { name: "Thomas KWIATKOWSKI", role: "Head of SEO" },
+      { name: "Guillaume ROSTAND", role: "CMO" },
+    ],
+    context: "Groupe OTA (Online Travel Agency) parmi les plus grands en Europe. Liligo est leur comparateur de voyages. Volume de recherche qui s'effrite mois après mois. Deux profils très différents à gérer en simultané.",
+    projects: [
+      { label: "Branding Liligo", detail: "Volume de recherche qui s'effrite — problème de notoriété structurel", p: "high" },
+      { label: "Design & UX", detail: "Refonte pages Homepage, location de voiture, vol, hôtel", p: "medium" },
+      { label: "SEO / GEO / LLM — Liligo", detail: "UX SEO, netlinking, et présence GEO/LLM — priorité Head of SEO", p: "high" },
+      { label: "IA + Géolocalisation (CMO)", detail: "Solution IA avec data géoloc pour personnaliser parcours retail — 6-12 mois", p: "medium" },
+      { label: "Vidéo automatisée (CMO)", detail: "Génération de contenu vidéo automatisée — 6-12 mois", p: "medium" },
+    ],
+    angle: "Deux RDVs en un. Avec Kwiatkowski : aller direct sur le GEO/LLM — le travel est une des catégories où l'IA générative capte le plus de trafic organique (ChatGPT répond directement 'vol Paris-Barcelone pas cher'). Hubble = la seule façon de mesurer et d'agir. Avec Rostand (CMO) : la vidéo automatisée est du pain bénit pour le Content Factory. Montrer l'exemple Equans pour l'angle contenu IA à grande échelle.",
+    opening: "Sur Liligo, est-ce que vous avez mesuré combien de requêtes 'comparateur de vols' sont maintenant capturées directement par les LLMs avant d'arriver sur votre site ?",
+    watchout: "Identifier lequel des deux est le sponsor interne. Le CMO a le budget, le Head of SEO a le problème concret. Grand groupe = processus de décision longs. Ne pas promettre des timelines irréalistes.",
+    tags: ["GEO","SEO","CONTENT","MEDIA"],
+    accent: "#e84393"
+  },
+  {
+    id: 5,
+    date: "Lundi 10 Mars", time: "16:00 → 16:25",
+    company: "PERFECT HEALTH SOLUTIONS", sector: "Santé / Compléments alimentaires D2C",
+    contacts: [
+      { name: "Xavier SCHMITZ", role: "Directeur Général & Responsable Développement Digital" },
+    ],
+    context: "Acteur D2C dans la santé/compléments. Le DG gère lui-même le digital — structure agile, décisionnaire direct. Ambition de rajeunir l'audience et capter de nouveaux segments via social et affiliation.",
+    projects: [
+      { label: "Affiliation restructurée", detail: "Partenaires leaders, display, native ads, social media premium", p: "high" },
+      { label: "Social / TikTok / Reels", detail: "Formats courts, social commerce pour rajeunir les cibles", p: "high" },
+      { label: "SEO — Top 3 sur requêtes prioritaires", detail: "Positionnement top 3, conformité moteurs de recherche", p: "high" },
+      { label: "GEO", detail: "Flaggé comme intérêt dans la fiche", p: "medium" },
+      { label: "UX & Expérience client", detail: "Optimiser l'expérience utilisateur sur le site", p: "medium" },
+    ],
+    angle: "Compléments alimentaires = territoire parfait pour GEO/LLM. Les gens demandent de plus en plus à ChatGPT 'quel complément prendre pour X'. Y&N peut positionner Perfect Health comme la réponse dans les LLMs ET sur le SEO classique. Le flat-rate Netflix est idéal pour un DG qui fait lui-même le digital et veut accéder à tous les sujets sans multiplier les agences.",
+    opening: "Quand vos clients potentiels cherchent des compléments pour [votre spécialité] sur ChatGPT, est-ce que vous savez si Perfect Health Solutions apparaît dans les réponses ?",
+    watchout: "Attention au secteur santé : contraintes réglementaires sur le contenu — ne pas sur-promettre sur l'automatisation. DG = décisionnaire direct, aller vite sur la valeur concrète, pas le pitch théorique.",
+    tags: ["SEO","GEO","MEDIA","SOCIAL"],
+    accent: "#20c997"
+  },
+  {
+    id: 6,
+    date: "Mercredi 11 Mars", time: "09:30 → 09:55",
+    company: "LEDGER", sector: "Crypto / Hardware Wallet — Retail & Marketplace International",
+    contacts: [
+      { name: "Julien LUCAS", role: "Consumer digital Sales Senior Director" },
+    ],
+    context: "Ledger est le leader mondial des hardware wallets crypto. Distribution mondiale, enjeux d'expansion retail/marketplace internationale. Profil très data-driven, contexte ultra-compétitif (Trezor, etc.).",
+    projects: [
+      { label: "SEO / GEO International", detail: "Stratégie SEO/GEO sur un scope international — présence LLMs sur requêtes crypto", p: "high" },
+      { label: "Retail & Marketplace International", detail: "Accompagnement pour la croissance du canal de vente indirecte à l'international", p: "high" },
+      { label: "Tunnel de paiement cross-border", detail: "Veille sur solutions acceptant devises et moyens de paiement locaux", p: "medium" },
+    ],
+    angle: "Ledger est un des cas GEO/LLM les plus évidents : quand quelqu'un demande à ChatGPT 'quel hardware wallet acheter', c'est une conversion directe. Démontrer la visibilité de Ledger vs Trezor dans les LLMs avec Hubble. Sur le marketplace international, l'expertise multi-pays central-to-local de Y&N est un argument différenciant fort.",
+    opening: "Si je demande à ChatGPT aujourd'hui 'quel hardware wallet crypto est le plus sécurisé' — vous savez ce qu'il répond et comment vous vous positionnez par rapport à Trezor ?",
+    watchout: "Interlocuteur senior, très orienté résultats business. Ne pas rester dans le discours tendance GEO — aller directement sur l'impact commercial mesurable. Préparer des exemples de requêtes crypto spécifiques avant le RDV.",
+    tags: ["SEO","GEO","MEDIA"],
+    accent: "#9b59b6"
+  },
+  {
+    id: 7,
+    date: "Mercredi 11 Mars", time: "10:00 → 10:25",
+    company: "CHRISTIAN DIOR COUTURE", sector: "Luxe — Mode & Accessoires",
+    contacts: [
+      { name: "Adnane BENTALEB", role: "Global Search Optimization & GEO Manager" },
+    ],
+    context: "Son titre est littéralement 'GEO Manager'. Il sait ce qu'est le GEO. Il est venu à Monaco pour chercher des solutions concrètes, pas du discours théorique. Niveau de conversation : expert à expert.",
+    projects: [
+      { label: "GEO Monitoring & Activation", detail: "Solution de monitoring de la visibilité Dior dans les LLMs + activation pour l'optimiser", p: "high" },
+      { label: "Digital Marketing Synergy", detail: "Synergies entre les différents leviers digitaux — approche connectée", p: "high" },
+      { label: "Content automation via IA Agents", detail: "Agents IA pour automatiser la production de contenu à l'échelle mondiale", p: "high" },
+      { label: "IA pour scale & optimisation des coûts", detail: "Utiliser l'IA pour scaler les projets digitaux et réduire les coûts", p: "medium" },
+    ],
+    angle: "C'est le RDV le plus technique de la semaine. Bentaleb est un pair, pas un prospect à éduquer. Hubble est l'arme principale — montrer le dashboard Dior vs Chanel vs Hermès en live sur des requêtes luxe. Sur le Content Factory : pour Dior l'enjeu n'est pas de produire plus mais de maintenir le tone of voice et la brand safety à l'échelle mondiale. C'est exactement ce que règle le 'Master Content' comme agent entraîné sur la voix de la marque.",
+    opening: "Sur Hubble, j'ai les données de visibilité LLM pour Dior sur les requêtes fashion luxe. Vous voulez commencer par là ou partir de votre stack GEO actuel ?",
+    watchout: "Ne pas lui vendre le concept de GEO — il le maîtrise mieux que la plupart. Aller directement sur : notre outil vs ce qu'il utilise aujourd'hui, et comment Y&N intègre monitoring + activation. Préparer des requêtes Dior spécifiques (robes soirée luxe, sac à main Dior…).",
+    tags: ["GEO","CONTENT","SEO"],
+    accent: "#c0392b"
+  },
+  {
+    id: 8,
+    date: "Mercredi 11 Mars", time: "11:00 → 11:25",
+    company: "SIZE FACTORY", sector: "Fashion — Retail E-commerce (Grande taille)",
+    contacts: [
+      { name: "Benjamin SELLEM", role: "Directeur Marketing & E-Commerce" },
+    ],
+    context: "Enseigne mode grande taille (size-factory.com, capelstore.fr + magasins). Vient de terminer 2 chantiers tech majeurs (ERP CEGID Retail + PSP PayPlug). Phase de stabilisation et d'optimisation. Note interne : 'prospect ok pour voir en OFF'.",
+    projects: [
+      { label: "Conversion Rate Optimization", detail: "Amélioration du taux de conversion sur les sites web post-implémentation ERP", p: "high" },
+      { label: "Programme de fidélité cross-canal", detail: "Fidélisation web + magasins — projet en réflexion", p: "high" },
+      { label: "Segmentation & Scoring client", detail: "Mieux segmenter et scorer les clients pour personnaliser les actions CRM", p: "high" },
+    ],
+    angle: "Ils sortent d'une phase projet lourde (ERP + PSP). Ils ont maintenant la data et l'infra — mais ne savent probablement pas encore quoi en faire. Y&N peut transformer cette data en performance : segmentation client (CRM), score de propension à racheter, et GEO pour capter les nouvelles clientes qui cherchent 'mode grande taille' dans les LLMs.",
+    opening: "Maintenant que l'ERP et le PSP sont en place, quelle est votre prochaine priorité — la croissance du trafic ou la conversion de ce que vous avez déjà ?",
+    watchout: "Note 'voir en OFF' dans le fichier — opportunité de relation plus détendue hors RDV officiel. Ne pas mettre trop de pression dans le créneau formel. Focus CRM/fidélité qui sont leurs priorités clairement identifiées — le GEO est secondaire ici.",
+    tags: ["CRM","CRO","SEO"],
+    accent: "#f39c12"
+  },
+  {
+    id: 9,
+    date: "Mercredi 11 Mars", time: "12:30 → 12:55",
+    company: "AXA PARTNERS", sector: "Assurance / InsurTech — Marque blanche BtoB",
+    contacts: [
+      { name: "David ASLAN", role: "Responsable Marketing Stratégique" },
+    ],
+    context: "Filiale BtoB d'AXA qui crée des produits d'assurance en marque blanche pour des partenaires (banques, telcos, e-commerçants). 5 projets bien définis — interlocuteur qui a déjà réfléchi.",
+    projects: [
+      { label: "Parcours souscription marque blanche", detail: "Parcours de souscription brandé partenaire, présentant les produits AXA Partners", p: "high" },
+      { label: "AgentIA — Expérience client", detail: "Transformation vers des agents IA pour améliorer l'expérience client", p: "high" },
+      { label: "IA dans les process", detail: "Intégration de l'IA pour optimiser les processus internes marketing", p: "medium" },
+      { label: "eCommerce personnalisation", detail: "Transformer le site e-commerce pour plus de personnalisation et nouveaux produits", p: "medium" },
+      { label: "Benchmark outils marketing", detail: "Veille et innovation sur les nouveaux outils marketing", p: "low" },
+    ],
+    angle: "Y&N doit aider à prioriser parmi les 5 projets et identifier où la valeur est la plus rapide. L'agent IA pour l'expérience client + le parcours de souscription en marque blanche sont deux sujets où le Content Factory IA Gen + CRM ont une réponse directe. Le benchmark outils est une opportunité de se positionner comme conseiller de confiance.",
+    opening: "Parmi vos 5 projets, lequel vous coûte le plus en temps et ressources internes aujourd'hui, et lequel aurait le plus d'impact business si vous le résolviez en 3 mois ?",
+    watchout: "David ASLAN est Responsable Marketing Stratégique — probablement pas le seul décisionnaire. Identifier qui d'autre dans la chaîne doit valider. AXA = processus d'achat longs. Rester concret sur les cas d'usage, pas les grandes visions.",
+    tags: ["CRM","GEO","CONTENT"],
+    accent: "#3498db"
+  },
+  {
+    id: 10,
+    date: "Mercredi 11 Mars", time: "13:30 → 13:55",
+    company: "LULLI SUR LA TOILE", sector: "Mode — E-commerce & Retail Omnicanal",
+    contacts: [
+      { name: "Elodie CHAN YU KING", role: "Directrice Marketing et Relation Client" },
+    ],
+    context: "E-commerçant mode avec ambitions d'internationalisation. Multiple projets en cours — de la refonte PSP à l'IA pour studio photo. Attention à ne pas s'éparpiller dans le RDV.",
+    projects: [
+      { label: "SEO / GEO / AEO — Acquisition", detail: "Amélioration de la stratégie d'acquisition organique + campagnes de notoriété", p: "high" },
+      { label: "CRM + IA — Fidélité", detail: "CRM boosté via IA : bot conversationnel, assistant réponse service client", p: "high" },
+      { label: "IA Studio — Catalogue photo", detail: "Production photo IA et automatisation catalogue produits", p: "medium" },
+      { label: "IA Contenu — Email / Campagnes", detail: "Production de contenu email et campagnes via IA", p: "medium" },
+      { label: "Internationalisation", detail: "Développement hors France — localisation, adaptation", p: "medium" },
+      { label: "Changement PSP", detail: "En cours de benchmark prestataires de paiement", p: "low" },
+    ],
+    angle: "Lulli est un cas d'usage idéal pour le Content Factory IA Gen : catalog automation + email content + social = tout Y&N. Sur l'internationalisation : notre expertise multi-pays (central-to-local) est directement pertinente. Montrer comment une marque mode peut 'être la réponse' sur des requêtes type 'robe fluide été 2026' dans les LLMs.",
+    opening: "Est-ce que vous avez une idée de combien de vos requêtes cibles en mode sont aujourd'hui capturées par des réponses IA avant d'arriver sur votre site ?",
+    watchout: "Trop de projets = risque de dispersion dans le RDV. Forcer une priorisation dès le début : 'Qu'est-ce qui vous fait le plus mal aujourd'hui ?'. Ne pas laisser la conversation partir sur le PSP — ce n'est pas notre terrain.",
+    tags: ["SEO","GEO","CRM","CONTENT"],
+    accent: "#e74c3c"
+  },
+  {
+    id: 11,
+    date: "Mercredi 11 Mars", time: "14:00 → 14:25",
+    company: "FRANÇOISE SAGET", sector: "Linge de Maison — E-commerce & Retail",
+    contacts: [
+      { name: "Antoine VIDAILHET", role: "Traffic Manager" },
+    ],
+    context: "Marque historique du linge de maison. Plusieurs grands chantiers tech en cours simultanément (replatforming 2027, PSP, fidélité, DAM/Akeneo, ERP, IA). Le Traffic Manager est l'opérationnel — vérifier qui est le décideur réel sur les projets importants.",
+    projects: [
+      { label: "Programme de fidélité cross-canal", detail: "Solution complète fidélité web + magasins + CRM. 2026", p: "high" },
+      { label: "IA dans tous les métiers", detail: "Déploiement IA transversal — objectif 2026", p: "high" },
+      { label: "Replatforming e-commerce", detail: "Sortie d'une solution custom — cherche partenaire d'intégration. Échéance 2027", p: "medium" },
+      { label: "Refonte paiement", detail: "Paiement mobile et fractionné — PSP + partenaire d'intégration. 2026", p: "medium" },
+      { label: "DAM / Akeneo", detail: "Mise en place d'un DAM commun print-web. 2026", p: "medium" },
+    ],
+    angle: "Y&N ne peut pas et ne doit pas se positionner sur le replatforming ou le PSP. Le terrain Y&N : IA dans les métiers marketing (Content Factory), fidélité/CRM, et GEO/SEO pour une marque linge de maison où les requêtes 'housse de couette en lin' migrent vers les LLMs.",
+    opening: "Parmi tous ces chantiers, lequel est le plus urgent pour vous personnellement dans votre rôle de Traffic Manager en 2026 ?",
+    watchout: "Antoine est Traffic Manager — l'opérationnel, probablement pas le décisionnaire sur les grands chantiers. Identifier qui pilote le projet IA transversal et le programme fidélité. Ne pas se perdre sur le replatforming (2027, hors scope Y&N).",
+    tags: ["CRM","CONTENT","SEO"],
+    accent: "#1abc9c"
+  },
+  {
+    id: 12,
+    date: "Mercredi 11 Mars", time: "14:30 → 14:55",
+    company: "2RIDE — SHARK HELMETS", sector: "Sport / Moto — E-commerce Multi-marques",
+    contacts: [
+      { name: "Mathilde BRES", role: "Senior Traffic Manager" },
+    ],
+    context: "Groupe 2Ride (Shark Helmets, Nolan et autres marques moto) vient de lancer 5 sites e-commerce. Phase de démarrage — la Traffic Manager doit structurer l'acquisition from scratch avec des ciblages très spécifiques (profils motards).",
+    projects: [
+      { label: "Structuration acquisition Paid + Influence", detail: "Structurer les campagnes dès le départ, efficacement", p: "high" },
+      { label: "Ciblages ultra-spécifiques", detail: "Profils fins (motards par type de moto/casque) — éviter le gaspillage budgétaire", p: "high" },
+      { label: "Nouveaux leviers d'acquisition", detail: "Tester des leviers au-delà des classiques", p: "medium" },
+      { label: "Cross border (NAM + Asie)", detail: "Expansion internationale — enjeu de localisation fort", p: "medium" },
+      { label: "IA Contenu", detail: "IA generated content pour alimenter les 5 sites", p: "medium" },
+    ],
+    angle: "5 sites à lancer, acquisition à structurer, ciblages techniques, international. Le flat-rate Netflix donne accès à Paid Media + Content + SEO/GEO sans multiplier les agences — exactement ce dont une Traffic Manager seule a besoin. Sur l'IA content : le Content Factory peut produire des fiches produits et contenus marque (casques, équipements) à grande échelle, multilingue.",
+    opening: "Vous venez de lancer 5 sites en même temps — est-ce que vous avez une stratégie d'acquisition différente par marque ou une approche commune que vous déclinez ?",
+    watchout: "Mathilde est opérationnelle et sous pression. Elle a besoin de solutions rapides et concrètes, pas de stratégie à 12 mois. Montrer comment Y&N peut être en production rapide (under 4 semaines). Ne pas trop étaler les capacités Y&N — elle a besoin qu'on priorise avec elle.",
+    tags: ["MEDIA","CONTENT","SEO"],
+    accent: "#e67e22"
+  },
+  {
+    id: 13,
+    date: "Mercredi 11 Mars", time: "15:00 → 15:25",
+    company: "PHARMAS", sector: "Pharmacie / Parapharmacie — D2C",
+    contacts: [
+      { name: "Ivan BUJAS", role: "VP Stratégie" },
+      { name: "Virginie MAURAN", role: "CMO & Head of D2C" },
+    ],
+    context: "Client existant rencontré à OneToOne Biarritz — Phase 2 d'une relation déjà amorcée. Travail déjà en place sur CRM et IA. L'objectif ici est de consolider et d'étendre la collaboration, pas de repartir de zéro.",
+    projects: [
+      { label: "Optimisation campagnes Ads (suite)", detail: "Continuer l'optimisation des campagnes, capitaliser sur les acquis", p: "high" },
+      { label: "Landing pages", detail: "Performance et optimisation des pages de destination", p: "high" },
+      { label: "SEO — suite", detail: "Continuer le travail SEO entamé", p: "medium" },
+      { label: "Performance marketing global", detail: "Vision consolidée de la performance marketing D2C", p: "medium" },
+    ],
+    angle: "C'est un RDV de suivi et d'expansion, pas de prospection. Venir avec un bilan chiffré des actions déjà menées et une proposition concrète pour la phase 2. Identifier ce qui n'a pas encore été traité (GEO/LLM probablement). L'ouverture du sujet GEO dans la pharma est explosive : 'quel antidouleur pour X' dans ChatGPT = des millions de requêtes.",
+    opening: "Depuis Biarritz, qu'est-ce qui a le mieux fonctionné et où est-ce que vous avez l'impression qu'on n'est pas encore allés assez loin ?",
+    watchout: "Ne pas arriver sans avoir préparé un bilan de la Phase 1 — ce serait une erreur en face d'un client existant. Deux décideurs : le VP Stratégie (vision) et la CMO (opérationnel). S'assurer que la conversation satisfait les deux niveaux.",
+    tags: ["MEDIA","SEO","CRM"],
+    accent: "#27ae60"
+  },
+  {
+    id: 14,
+    date: "Mercredi 11 Mars", time: "15:30 → 15:55",
+    company: "SAS IMPORELEC", sector: "E-commerce B2B — Matériel Électrique",
+    contacts: [
+      { name: "Julien DREANO", role: "Directeur E-commerce" },
+      { name: "Julien TREMIER", role: "Responsable Informatique et E-commerce" },
+    ],
+    context: "Distributeur e-commerce de matériel électrique B2B. Marché technique, catalogue produits énorme et complexe. Deux profils complémentaires : DREANO (business), TREMIER (IT). Projets bien structurés et concrets.",
+    projects: [
+      { label: "Challenge agence SEA", detail: "Remettre en concurrence leur agence SEA — sous 2-6 mois", p: "high" },
+      { label: "IA Moteur de recherche intelligent", detail: "Comprendre les besoins techniques ('prise étanche 16A Schneider'), proposer équivalents", p: "high" },
+      { label: "Outil IA — Contenu & Sémantique", detail: "IA pour améliorer le contenu et la sémantique du catalogue", p: "high" },
+      { label: "Veille tarifaire concurrentielle", detail: "Suivre les prix en temps réel, ajuster les tarifs, identifier les marges", p: "high" },
+      { label: "Enrichissement catalogue", detail: "Repérer les produits manquants, enrichir les fiches existantes", p: "medium" },
+    ],
+    angle: "Deux sujets Y&N directs : le challenge agence SEA (Y&N MEDIA peut se positionner) et l'IA pour le contenu/sémantique (Content Factory IA Gen). Sur le SEA : préparer une proposition concrète de compétition d'agence (benchmark, audit, test). Le moteur de recherche intelligent est plus tech — Y&N peut être apporteur de solution via son écosystème partenaires.",
+    opening: "Sur le challenge SEA — vous cherchez une agence qui va juste exécuter mieux, ou quelqu'un qui va aussi vous challenger sur la stratégie et les audiences ?",
+    watchout: "Distinguer qui pilote quoi : DREANO = business/commercial, TREMIER = IT. La décision finale est probablement commune. Le TMS et l'ERP ne sont pas le terrain Y&N — ne pas s'aventurer sur ces sujets.",
+    tags: ["MEDIA","CONTENT","SEO"],
+    accent: "#8e44ad"
+  },
+  {
+    id: 15,
+    date: "Mercredi 11 Mars", time: "17:30 → 17:55",
+    company: "DELTICOM", sector: "E-commerce — Pneumatiques (Allemagne / Europe)",
+    contacts: [
+      { name: "Alexandra FILCA", role: "Marketplace Manager" },
+    ],
+    context: "Acteur européen majeur de la vente de pneus en ligne (Reifendirekt, Tirendo…). Note interne : 'AGENCE SEA' — cherchent activement une agence SEA. Scope opérationnel Marketplace.",
+    projects: [
+      { label: "Nouveaux partenaires Marketplace & Affiliation", detail: "Intégrer le catalogue pneus complet (voiture, SUV, moto, camion, VE) sur de nouveaux canaux", p: "high" },
+      { label: "Maximiser la performance existante", detail: "Meilleur contenu, advertising, pricing, logistique, engagement sur MP actuelles", p: "high" },
+      { label: "Croissance réseaux d'affiliation", detail: "Renforcer les partenariats affiliation existants — visibilité et performance", p: "medium" },
+    ],
+    angle: "La note 'AGENCE SEA' dans le fichier = porte d'entrée principale. Y&N Media peut se positionner sur le SEA avec une vision plus large (SEO/GEO pour les pneus, où les requêtes LLM 'pneu été SUV 235/45 R18' commencent à émerger). Sur le marketplace : notre expertise multi-marchés européens est un atout. Préparer une vue de leur présence Google Shopping / Amazon vs concurrents.",
+    opening: "Quand vous regardez vos campagnes SEA aujourd'hui, c'est quoi le levier que votre agence actuelle n'exploite pas assez ?",
+    watchout: "Alexandra FILCA est Marketplace Manager — l'opérationnelle, pas nécessairement la décisionnaire finale. Identifier qui valide les choix d'agences au-dessus d'elle. Le marché pneus est très price-sensitive — ne pas sur-vendre le premium.",
+    tags: ["MEDIA","SEO","GEO"],
+    accent: "#2c3e50"
+  },
+];
+
+let current = 0;
+
+function render() {
+  const m = meetings[current];
+  document.documentElement.style.setProperty('--accent', m.accent);
+
+  // Update nav buttons
+  document.getElementById('nav-buttons').innerHTML = meetings.map((mt, i) => `
+    <button class="nav-btn ${i === current ? 'active' : ''}"
+      style="${i === current ? `background:${mt.accent};border-color:${mt.accent};` : ''}"
+      onclick="goto(${i})">${mt.company.split(/[\s–—]/)[0]}</button>
+  `).join('');
+
+  // Build card
+  const card = `
+    <div class="card-header">
+      <div class="card-créneau">${m.date} · ${m.time}</div>
+      <div class="card-company">${m.company}</div>
+      <div class="card-sector">${m.sector}</div>
+      <div class="tags">${m.tags.map(t => {
+        const c = TAG_COLORS[t] || {bg:'#33333322',border:'#55555555',text:'#999'};
+        return `<span class="tag" style="background:${c.bg};border-color:${c.border};color:${c.text}">${t}</span>`;
+      }).join('')}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Contacts</div>
+      <div class="contacts">
+        ${m.contacts.map(c => `
+          <div class="contact-card">
+            <div class="contact-name">${c.name}</div>
+            <div class="contact-role">${c.role}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Contexte</div>
+      <p class="text-block">${m.context}</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Leurs projets</div>
+      <div class="projects">
+        ${m.projects.map(p => `
+          <div class="project-item">
+            <div class="priority-dot priority-${p.p}"></div>
+            <div>
+              <div class="project-label">${p.label}</div>
+              <div class="project-detail">${p.detail}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="priority-legend">
+        <span style="color:#ef4444">● haute priorité</span>
+        <span style="color:#f59e0b">● priorité moyenne</span>
+        <span style="color:#555">● secondaire</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Notre angle — Y&N</div>
+      <div class="angle-block" style="background:${m.accent}11;border-color:${m.accent}33">
+        <p>${m.angle}</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Question d'ouverture</div>
+      <div class="opening-block" style="border-color:${m.accent}">" ${m.opening} "</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title danger">⚠ Points de vigilance</div>
+      <div class="watchout-block"><p>${m.watchout}</p></div>
+    </div>
+
+    <div id="bottom-nav">
+      <button class="nav-arrow" onclick="goto(${current-1})" ${current===0?'disabled':''}>← précédent</button>
+      <span id="counter">${current+1} / ${meetings.length}</span>
+      <button class="nav-arrow next-btn" onclick="goto(${current+1})"
+        style="background:${current===meetings.length-1?'transparent':m.accent};border-color:${current===meetings.length-1?'#2a2a3a':m.accent}"
+        ${current===meetings.length-1?'disabled':''}>suivant →</button>
+    </div>
+  `;
+
+  document.getElementById('main').innerHTML = card;
+  window.scrollTo({ top: 0 });
+}
+
+function goto(i) {
+  if (i < 0 || i >= meetings.length) return;
+  current = i;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
